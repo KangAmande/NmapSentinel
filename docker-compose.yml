@@ -1,6 +1,6 @@
-version: '3.8'
 services:
-  target_server:
+  # This is the "Victim" - the target to scan
+  victim-server:
     image: nginx:latest
     ports:
-      - "8080:80" # Map host port 8080 to container port 80
+      - "8080:80"  # This maps port 8080 on the PC to port 80 in Docker
