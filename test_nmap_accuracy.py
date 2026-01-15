@@ -3,6 +3,7 @@ import pytest
 
 TARGET_IP = '127.0.0.1'
 TARGET_PORT = '8080'
+CLOSED_PORT = '9999'
 
 @pytest.fixture
 def scanner():
@@ -32,6 +33,20 @@ def test_nmap_detects_open_port(scanner):
     
     # Assertion
     assert actual_state == 'open', f"DEALBREAKER: Nmap missed an open port! Reported: {actual_state}"
+
+def test_nmap_reports_closed_port_correctly(scanner):
+    """
+    NEGATIVE TEST: Verify Nmap doesn't hallucinate. 
+    It should report port 9999 as 'closed'.
+    """
+    print(f"\n[Audit] Checking closed port {CLOSED_PORT}...")
+    scanner.scan(TARGET_IP, CLOSED_PORT, arguments='-sT -Pn')
+    
+    # If the port isn't in the results, it's effectively closed/filtered
+    state = scanner[TARGET_IP]['tcp'][int(CLOSED_PORT)]['state']
+    
+    print(f"[Result] Nmap reported {CLOSED_PORT} as: {state}")
+    assert state == 'closed' or state == 'filtered'
 
 def test_nmap_identifies_service_correctly(scanner):
     """
