@@ -58,3 +58,14 @@ def test_nmap_identifies_service_correctly(scanner):
     print(f"[Result] Nmap identified service as: {service_name}")
 
     assert 'http' in service_name, f"DEALBREAKER: Nmap misidentified the service! Found: {service_name}"
+
+def test_scan_speed_consistency(scanner):
+    """
+    STRESS TEST: Does 'Aggressive' mode (-T5) still get the right answer?
+    Sometimes fast scans miss things.
+    """
+    print("\n[Audit] Running High-Speed Scan (-T5)...")
+    scanner.scan(TARGET_IP, TARGET_PORT, arguments='-sT -Pn -T5')
+    
+    state = scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]['state']
+    assert state == 'open', "FAIL: High-speed scan caused Nmap to miss the port!"
