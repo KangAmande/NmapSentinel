@@ -10,6 +10,21 @@ def scanner():
     """Fixture to initialize the Nmap scanner for each test."""
     return nmap.PortScanner()
 
+def test_nse_http_title_extraction(scanner):
+    """
+    INTEL TEST: Can Nmap read the 'Welcome to nginx!' title?
+    This tests Nmap's Scripting Engine (NSE) integration.
+    """
+    print("\n[Audit] Running NSE Script: http-title...")
+    # --script=http-title asks Nmap to grab the HTML title
+    scanner.scan(TARGET_IP, TARGET_PORT, arguments='-sT -Pn --script=http-title')
+    
+    # Access the script output from the scan results
+    script_output = scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]['script']['http-title']
+    
+    print(f"[Result] Nmap found page title: {script_output}")
+    assert "Welcome to nginx!" in script_output
+
 def test_nmap_detects_open_port(scanner):
     """
     AUDIT 1: Verify Nmap correctly sees the port as 'open'.
