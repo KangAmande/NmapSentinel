@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+# addopts automatically adds these flags every time 'pytest' is typed
+addopts = "--html=Nmap_Sentinel_Report.html --self-contained-html -v -s"
+testpaths = ["."]

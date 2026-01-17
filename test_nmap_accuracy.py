@@ -1,5 +1,6 @@
 import nmap
 import pytest
+from datetime import datetime
 
 TARGET_IP = '127.0.0.1'
 TARGET_PORT = '8080'
@@ -84,3 +85,12 @@ def test_scan_speed_consistency(scanner):
     
     state = scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]['state']
     assert state == 'open', "FAIL: High-speed scan caused Nmap to miss the port!"
+
+def pytest_html_report_title(report):
+    report.title = "Nmap Sentinel: Security Tool Integrity Report"
+
+def pytest_configure(config):
+    # This adds custom metadata to the 'Environment' section of report
+    config._metadata['Project'] = 'Nmap Integrity Framework'
+    config._metadata['Department'] = 'Digital Forensics & CTI'
+    config._metadata['Execution Time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
