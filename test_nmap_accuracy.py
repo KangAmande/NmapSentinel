@@ -11,6 +11,18 @@ def scanner():
     """Fixture to initialize the Nmap scanner for each test."""
     return nmap.PortScanner()
 
+@pytest.mark.osdetection
+def test_os_detection(scanner):
+    """AUDIT: Verify Nmap can identify the OS as Windows (Docker)."""
+    # Note: OS detection often requires root/admin privileges
+    scanner.scan(TARGET_IP, TARGET_PORT, arguments='-O --osscan-guess')
+    
+    os_class = scanner[TARGET_IP]['osmatch'][0]['osclass'][0]
+    os_family = os_class['osfamily']
+    
+    print(f"[Result] Nmap thinks this is: {os_family}")
+    assert os_family == 'Windows', f"Error: Identified as {os_family} instead of Windows!"
+
 def test_nse_http_title_extraction(scanner):
     """
     INTEL TEST: Can Nmap read the 'Welcome to nginx!' title?
