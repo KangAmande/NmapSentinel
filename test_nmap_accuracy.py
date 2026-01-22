@@ -23,6 +23,21 @@ def test_os_detection(scanner):
     print(f"[Result] Nmap thinks this is: {os_family}")
     assert os_family == 'Windows', f"Error: Identified as {os_family} instead of Windows!"
 
+def test_vulnerability_scan(scanner):
+    """AUDIT: Check for known CVEs using the vulners database."""
+    print("\n[Audit] Searching for known vulnerabilities...")
+    # -sV is required for vulners to know the version to look up
+    scanner.scan(TARGET_IP, TARGET_PORT, arguments='-sV --script vulners')
+    
+    # Check if the 'vulners' script found anything
+    script_results = scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]['script']
+    
+    if 'vulners' in script_results:
+        print(f"[Result] Vulnerabilities found!\n{script_results['vulners']}")
+    else:
+        print("[Result] No vulnerabilities found. Container is hardened.")
+
+        
 def test_nse_http_title_extraction(scanner):
     """
     INTEL TEST: Can Nmap read the 'Welcome to nginx!' title?
