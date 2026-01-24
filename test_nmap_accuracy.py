@@ -1,6 +1,7 @@
 import nmap
 import pytest
 from datetime import datetime
+import xml.etree.ElementTree as ET
 
 TARGET_IP = '127.0.0.1'
 TARGET_PORT = '8080'
@@ -37,7 +38,7 @@ def test_vulnerability_scan(scanner):
     else:
         print("[Result] No vulnerabilities found. Container is hardened.")
 
-        
+
 def test_nse_http_title_extraction(scanner):
     """
     INTEL TEST: Can Nmap read the 'Welcome to nginx!' title?
@@ -112,6 +113,23 @@ def test_scan_speed_consistency(scanner):
     
     state = scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]['state']
     assert state == 'open', "FAIL: High-speed scan caused Nmap to miss the port!"
+
+
+def test_udp_port_detection(scanner):
+    """
+    AUDIT: Can Nmap find a connectionless UDP port?
+    UDP scans (-sU) are notoriously slow and unreliable. 
+    This test verifies if the tool accurately sees our NTP simulation.
+    """
+    print("\n[Audit] Performing UDP Scan on port 123...")
+    # Note: UDP scanning usually requires Admin/Sudo
+    scanner.scan(TARGET_IP, '123', arguments='-sU -Pn')
+    
+    state = scanner[TARGET_IP]['udp'][123]['state']
+    print(f"[Result] Nmap reported UDP 123 as: {state}")
+    
+    # UDP often returns 'open|filtered' which is acceptable in forensics
+    assert 'open' in state, f"DEALBREAKER: Nmap missed the UDP service!"
 
 def pytest_html_report_title(report):
     report.title = "Nmap Sentinel: Security Tool Integrity Report"
