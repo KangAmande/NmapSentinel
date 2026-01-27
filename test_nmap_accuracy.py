@@ -131,6 +131,21 @@ def test_udp_port_detection(scanner):
     # UDP often returns 'open|filtered' which is acceptable in forensics
     assert 'open' in state, f"DEALBREAKER: Nmap missed the UDP service!"
 
+def test_aggressive_mode_bundle(scanner):
+    """
+    AUDIT: Does '-A' (Aggressive) successfully bundle all features?
+    -A is a macro for OS detection, Versioning, Scripting, and Traceroute.
+    """
+    print("\n[Audit] Running Aggressive Scan (-A)...")
+    scanner.scan(TARGET_IP, TARGET_PORT, arguments='-A')
+    
+    # Check if multiple types of data are present in the result
+    has_os = 'osmatch' in scanner[TARGET_IP]
+    has_scripts = 'script' in scanner[TARGET_IP]['tcp'][int(TARGET_PORT)]
+    
+    print(f"[Result] OS Data present: {has_os}, Script Data present: {has_scripts}")
+    assert has_os and has_scripts, "DEALBREAKER: Aggressive mode failed to return bundled data!"
+
 def pytest_html_report_title(report):
     report.title = "Nmap Sentinel: Security Tool Integrity Report"
 
