@@ -146,6 +146,23 @@ def test_aggressive_mode_bundle(scanner):
     print(f"[Result] OS Data present: {has_os}, Script Data present: {has_scripts}")
     assert has_os and has_scripts, "DEALBREAKER: Aggressive mode failed to return bundled data!"
 
+def test_xml_output_integrity(scanner):
+    """
+    AUDIT: Machine-Readable Integrity.
+    In CTI, we often pipe Nmap results into other tools via XML. 
+    This test ensures the XML Nmap generates is valid and matches the console.
+    """
+    print("\n[Audit] Verifying XML output integrity...")
+    xml_data = scanner.get_nmap_last_output()
+    
+    # Try to parse the XML. If it's malformed, this will throw an error.
+    root = ET.fromstring(xml_data)
+    
+    # Verify the host in XML matches our target IP
+    xml_host = root.find(".//address").get('addr')
+    print(f"[Result] XML matches Target IP: {xml_host == TARGET_IP}")
+    assert xml_host == TARGET_IP, "DEALBREAKER: XML report data mismatch!"
+    
 def pytest_html_report_title(report):
     report.title = "Nmap Sentinel: Security Tool Integrity Report"
 
